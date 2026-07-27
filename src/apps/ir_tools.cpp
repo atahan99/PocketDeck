@@ -1,10 +1,10 @@
-#include <IRac.h>
 #include <IRrecv.h>
 #include <IRsend.h>
 #include <IRutils.h>
 #include <Preferences.h>
 
 #include "apps.h"
+#include "flipper_ac_off.h"
 #include "tvbgone.h"
 #include "ui.h"
 
@@ -12,15 +12,15 @@ using ui::fb;
 
 // IR on the StickS3's built-in emitter (G46) + receiver (G42):
 //   TV-B-Gone NA/EU -- sweep the TV-B-Gone power-code DB, shut off nearby TVs
-//   AC-B-Gone       -- send an OFF frame for each common AC protocol
+//   AC-B-Gone       -- blast the Flipper universal AC "Off" raw codes
 //   Univ. Remote    -- learn a real remote's button on G42, replay it on G46
+//   IR Self-Test    -- loopback to confirm the emitter actually transmits
 // BtnB scrolls, BtnA runs, long-press aborts a sweep or exits the menu.
 
 namespace {
 constexpr uint16_t IR_LED = 46;
 constexpr uint16_t IR_RX = 42;
 IRsend irsend(IR_LED);
-IRac irac(IR_LED);
 
 // ---- Universal remote: 3 slots, persisted to NVS so learned remotes survive reboot.
 constexpr int SLOTS = 3, RAWMAX = 300;
@@ -138,36 +138,64 @@ void blast_tvb(const IrCode *code) {
   irsend.sendRaw(raw, n, tvb_freq_khz(tv));
 }
 
-// A spread of the common AC protocols. OFF frame each -- best-effort blanket.
-const decode_type_t AC_PROTOCOLS[] = {
-    COOLIX, DAIKIN, MITSUBISHI_AC, FUJITSU_AC, PANASONIC_AC, SAMSUNG_AC,
-    LG, GREE, HITACHI_AC, TCL112AC, MIDEA, HAIER_AC, TOSHIBA_AC, ELECTRA_AC,
-};
-
+// AC-B-Gone: blast every "Off" code from the vendored Flipper universal AC DB
+// (include/flipper_ac_off.h). Brand-agnostic raw frames -- covers the split ACs
+// a named-protocol library misses. Aim the top edge at the unit.
 void run_ac_bgone() {
-  const int total = NUM_ELEM(AC_PROTOCOLS);
-  for (int i = 0; i < total; i++) {
+  for (int i = 0; i < AC_OFF_COUNT; i++) {
     fb.fillScreen(TFT_BLACK);
     ui::header("AC-B-Gone", TFT_RED);
     fb.setTextColor(TFT_WHITE, TFT_BLACK);
-    fb.setCursor(6, 60);
-    fb.printf("%d / %d", i + 1, total);
-    fb.setCursor(6, 80);
-    fb.print(typeToString(AC_PROTOCOLS[i]).c_str());
+    fb.setCursor(6, 55);
+    fb.printf("%d / %d", i + 1, AC_OFF_COUNT);
+    fb.drawRect(6, 78, ui::W - 12, 12, TFT_DARKGREY);
+    fb.fillRect(6, 78, (ui::W - 12) * (i + 1) / AC_OFF_COUNT, 12, TFT_RED);
+    fb.setCursor(6, 100);
+    fb.print("Flipper AC codes");
     if (ui::frame(0).home) return;
 
-    stdAc::state_t s;
-    s.protocol = AC_PROTOCOLS[i];
-    s.model = -1;
-    s.power = false;                      // the point: turn it off
-    s.mode = stdAc::opmode_t::kAuto;
-    s.degrees = 25;
-    s.fanspeed = stdAc::fanspeed_t::kAuto;
-    s.swingv = stdAc::swingv_t::kOff;
-    s.swingh = stdAc::swingh_t::kOff;
-    s.celsius = true;
-    irac.sendAc(s, nullptr);
-    delay(120);
+    const uint16_t *d = (const uint16_t *)pgm_read_ptr(&AC_OFF_CODES[i].data);
+    uint16_t len = pgm_read_word(&AC_OFF_CODES[i].len);
+    irsend.sendRaw(d, len, 38);   // ESP32 flash is memory-mapped; direct read is fine
+    delay(50);
+  }
+}
+
+// Loopback self-test: fire a code on G46 and try to hear it on the G42 receiver.
+// Aim the top edge at a wall/your hand so the beam reflects back.
+void ir_selftest() {
+  IRrecv rx(IR_RX, 1024, 15, true);
+  rx.enableIRIn();
+  bool ok = false;
+  String info;
+  decode_results r;
+  for (int t = 0; t < 6 && !ok; t++) {
+    irsend.sendNEC(0x20DF10EFULL);
+    uint32_t end = millis() + 250;
+    while (millis() < end) {
+      if (rx.decode(&r)) { ok = true; info = typeToString(r.decode_type) + " 0x" + uint64ToString(r.value, 16); break; }
+      delay(5);
+    }
+  }
+  rx.disableIRIn();
+  Serial.printf("IR selftest: %s %s\n", ok ? "OK" : "FAIL", info.c_str());
+  while (true) {
+    ui::header("IR Self-Test", ok ? TFT_GREEN : TFT_RED);
+    fb.setTextColor(ok ? TFT_GREEN : TFT_RED, TFT_BLACK);
+    fb.setTextSize(2);
+    fb.setCursor(6, 40);
+    fb.print(ok ? "EMITTER OK" : "no echo");
+    fb.setTextSize(1);
+    fb.setTextColor(TFT_DARKGREY, TFT_BLACK);
+    fb.setCursor(6, 70);
+    fb.print(ok ? info.c_str() : "aim top edge at a wall,");
+    fb.setCursor(6, 82);
+    if (!ok) fb.print("hold, and retry (A)");
+    fb.setCursor(6, ui::H - 10);
+    fb.print("A=retry  hold=back");
+    ui::Ev ev = ui::frame();
+    if (ev.home) return;
+    if (ev.a) { ir_selftest(); return; }
   }
 }
 
@@ -192,16 +220,16 @@ void run_tvb(const struct IrCode **region, uint8_t total) {
 
 void app_ir_tools() {
   irsend.begin();
-  irac.next.protocol = COOLIX;            // init IRac defaults
 
-  const char *items[] = {"TV-B-Gone NA", "TV-B-Gone EU", "AC-B-Gone", "Univ. Remote"};
+  const char *items[] = {"TV-B-Gone NA", "TV-B-Gone EU", "AC-B-Gone", "Univ. Remote", "IR Self-Test"};
   int sel = 0;
   while (true) {
-    int r = ui::menu("IR Tools", TFT_ORANGE, items, 4, sel);
+    int r = ui::menu("IR Tools", TFT_ORANGE, items, 5, sel);
     if (r == ui::MENU_BACK) break;
     if (r == 0) run_tvb(NApowerCodes, num_NAcodes);
     else if (r == 1) run_tvb(EUpowerCodes, num_EUcodes);
     else if (r == 2) run_ac_bgone();
     else if (r == 3) universal_remote();
+    else if (r == 4) ir_selftest();
   }
 }
