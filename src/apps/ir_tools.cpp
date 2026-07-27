@@ -161,41 +161,32 @@ void run_ac_bgone() {
   }
 }
 
-// Loopback self-test: fire a code on G46 and try to hear it on the G42 receiver.
-// Aim the top edge at a wall/your hand so the beam reflects back.
+// Emitter test: continuously fire the IR LED (TX only -- exactly what TV/AC-B-Gone
+// do) so a PHONE CAMERA can confirm it works. IR shows up as a flickering
+// purple/white dot on screen. A loopback via the on-board receiver is unreliable
+// (emitter + receiver face the same way, and TX+RX together can fight over RMT),
+// so we test emission directly instead.
 void ir_selftest() {
-  IRrecv rx(IR_RX, 1024, 15, true);
-  rx.enableIRIn();
-  bool ok = false;
-  String info;
-  decode_results r;
-  for (int t = 0; t < 6 && !ok; t++) {
-    irsend.sendNEC(0x20DF10EFULL);
-    uint32_t end = millis() + 250;
-    while (millis() < end) {
-      if (rx.decode(&r)) { ok = true; info = typeToString(r.decode_type) + " 0x" + uint64ToString(r.value, 16); break; }
-      delay(5);
-    }
-  }
-  rx.disableIRIn();
-  Serial.printf("IR selftest: %s %s\n", ok ? "OK" : "FAIL", info.c_str());
+  uint32_t n = 0;
   while (true) {
-    ui::header("IR Self-Test", ok ? TFT_GREEN : TFT_RED);
-    fb.setTextColor(ok ? TFT_GREEN : TFT_RED, TFT_BLACK);
-    fb.setTextSize(2);
-    fb.setCursor(6, 40);
-    fb.print(ok ? "EMITTER OK" : "no echo");
-    fb.setTextSize(1);
+    ui::header("IR Emit Test", TFT_ORANGE);
+    fb.setTextColor(TFT_WHITE, TFT_BLACK);
+    fb.setCursor(4, 22);
+    fb.print("Point a PHONE CAMERA");
+    fb.setCursor(4, 34);
+    fb.print("(front cam) at the top.");
+    fb.setTextColor(TFT_GREEN, TFT_BLACK);
+    fb.setCursor(4, 54);
+    fb.print("The IR LED should");
+    fb.setCursor(4, 66);
+    fb.print("flicker on the screen.");
     fb.setTextColor(TFT_DARKGREY, TFT_BLACK);
-    fb.setCursor(6, 70);
-    fb.print(ok ? info.c_str() : "aim top edge at a wall,");
-    fb.setCursor(6, 82);
-    if (!ok) fb.print("hold, and retry (A)");
-    fb.setCursor(6, ui::H - 10);
-    fb.print("A=retry  hold=back");
-    ui::Ev ev = ui::frame();
-    if (ev.home) return;
-    if (ev.a) { ir_selftest(); return; }
+    fb.setCursor(4, ui::H - 10);
+    fb.printf("blasting #%lu   hold=back", (unsigned long)n);
+
+    irsend.sendNEC(0x20DF10EFULL);   // fire the emitter
+    n++;
+    if (ui::frame(70).home) return;  // ~12 blasts/sec -> easy camera flicker
   }
 }
 
@@ -221,7 +212,7 @@ void run_tvb(const struct IrCode **region, uint8_t total) {
 void app_ir_tools() {
   irsend.begin();
 
-  const char *items[] = {"TV-B-Gone NA", "TV-B-Gone EU", "AC-B-Gone", "Univ. Remote", "IR Self-Test"};
+  const char *items[] = {"TV-B-Gone NA", "TV-B-Gone EU", "AC-B-Gone", "Univ. Remote", "IR Emit Test"};
   int sel = 0;
   while (true) {
     int r = ui::menu("IR Tools", TFT_ORANGE, items, 5, sel);

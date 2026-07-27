@@ -20,7 +20,7 @@ display/pins and boot blank on this board).
 | **WiFi Scan** | 2.4 GHz APs: SSID, RSSI, channel, encryption. RSSI-colored. |
 | **Spectrum** | Promiscuous-mode channel monitor, ch 1–13 decaying bars + live packet HUD (RSSI/channel/ENC·OPEN). |
 | **Audio Viz** | Built-in ES8311 mic → FFT → reactive bars for ambient music. BtnA cycles gain. |
-| **IR Tools** | **TV-B-Gone** (Adafruit NA/EU power-code sweep), **AC-B-Gone** (blasts the 123 "Off" codes from Flipper Zero's universal `ac.ir`), a **Universal Remote** (learn on G42 → replay on G46, 3 slots in NVS), and an **IR Self-Test** (G46→G42 loopback to confirm the emitter transmits). |
+| **IR Tools** | **TV-B-Gone** (Adafruit NA/EU power-code sweep), **AC-B-Gone** (blasts the 123 "Off" codes from Flipper Zero's universal `ac.ir`), a **Universal Remote** (learn on G42 → replay on G46, 3 slots in NVS), and an **IR Emit Test** (continuously fires the LED so a phone camera can confirm the emitter works). |
 | **AI Buddy** | Claude Code / Codex / Cursor session status, pushed from a host over **WiFi or BLE** (selectable). |
 | **BLE Scan** | Passive scan: nearby BLE devices, name/MAC, RSSI-colored. |
 | **BLE Spam** | Advertising-beacon spammer (Apple / Windows / Samsung / Android / All) — pairing-popup nuisance demo. **Warning-gated, authorized/own-device use only.** |
