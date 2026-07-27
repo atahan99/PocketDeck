@@ -134,6 +134,10 @@ Ev frame(uint32_t delay_ms) {
   ev.b_double = M5.BtnB.wasDoubleClicked() || g_inject.b_double;
   g_inject = Ev{};
 
+  // Hold the power button to sleep on demand (deliberate, so unlike the idle
+  // auto-sleep it fires on USB too).
+  if (M5.BtnPWR.wasHold()) deep_idle_sleep();
+
   // Idle management: input (real or injected) keeps it awake; else dim, then sleep.
   if (ev.a || ev.b || ev.pwr || ev.home) stay_awake();
   uint32_t idle = millis() - idle_since;

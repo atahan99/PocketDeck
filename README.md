@@ -30,10 +30,11 @@ display/pins and boot blank on this board).
 | **Settings** | WiFi provisioning (captive portal), brightness, **Grove 5V toggle** (re-enable the boost for a 5V Grove unit), about. |
 
 **Power & persistence.** Battery % + charge state show in every header (glyph
-blinks red under 10%). The screen
-dims after 20 s idle and, **on battery only**, deep-sleeps after 2 min (wakes on a
-button) — it never sleeps on USB so flashing/serial stay alive. Brightness and the
-last-opened launcher card persist in NVS.
+blinks red under 10%). The screen dims after 20 s idle and, **on battery only**,
+deep-sleeps after 2 min (wakes on a button) — it never *auto*-sleeps on USB so
+flashing/serial stay alive. **Hold the power button** to sleep on demand (works on
+USB too; a button press wakes it). Brightness and the last-opened launcher card
+persist in NVS.
 
 **Input model.** Two buttons everywhere (BtnA = KEY1/front, BtnB = KEY2/right side):
 **BtnA = select/action**, **BtnB = next**, **long-press = back/home**. Apps own
