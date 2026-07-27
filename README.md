@@ -20,14 +20,14 @@ display/pins and boot blank on this board).
 | **WiFi Scan** | 2.4 GHz APs: SSID, RSSI, channel, encryption. RSSI-colored. |
 | **Spectrum** | Promiscuous-mode channel monitor, ch 1–13 decaying bars + live packet HUD (RSSI/channel/ENC·OPEN). |
 | **Audio Viz** | Built-in ES8311 mic → FFT → reactive bars for ambient music. BtnA cycles gain. |
-| **IR Tools** | **TV-B-Gone** (NA/EU power-code sweep), **AC-B-Gone** (OFF frame per common AC protocol) on G46, and a **Universal Remote** — learn a real remote on G42, replay on G46 (3 slots, persisted to NVS). |
+| **IR Tools** | **TV-B-Gone** (Adafruit NA/EU power-code sweep), **AC-B-Gone** (blasts the 123 "Off" codes from Flipper Zero's universal `ac.ir`), a **Universal Remote** (learn on G42 → replay on G46, 3 slots in NVS), and an **IR Self-Test** (G46→G42 loopback to confirm the emitter transmits). |
 | **AI Buddy** | Claude Code / Codex / Cursor session status, pushed from a host over **WiFi or BLE** (selectable). |
 | **BLE Scan** | Passive scan: nearby BLE devices, name/MAC, RSSI-colored. |
 | **BLE Spam** | Advertising-beacon spammer (Apple / Windows / Samsung / Android / All) — pairing-popup nuisance demo. **Warning-gated, authorized/own-device use only.** |
 | **Time** | Offline time tools: Stopwatch, Timer (BtnB +1 / double-click −1), Pomodoro, Interval (Tabata). No clock/WiFi. |
 | **Light** | Flashlight — full-white screen at max brightness. |
 | **Toys** | Tetris, Snake, Flappy, Dino (NVS high score), Breakout, Tilt Maze (BMI270). |
-| **Settings** | WiFi provisioning (captive portal), brightness, **Grove 5V toggle** (re-enable the boost for a 5V Grove unit), about. |
+| **Settings** | **WiFi** (radio off by default — toggle on/off, connection status, captive-portal setup), brightness, **Grove 5V toggle**, about. |
 
 **Power & persistence.** Battery % + charge state show in every header (glyph
 blinks red under 10%). The screen dims after 20 s idle and, **on battery only**,
@@ -169,5 +169,6 @@ native rebuild for the StickS3, not a port of any of them:
 
 TV-B-Gone power codes are the canonical **Adafruit / Ken Shirriff port of Mitch
 Altman + Limor Fried's** TV-B-Gone firmware (`src/tvbgone_codes.cpp`), *not* the
-AGPL Bruce fork — so this stays a clean-licensed personal project. AC OFF frames
-come from [IRremoteESP8266](https://github.com/crankyoldgit/IRremoteESP8266).
+AGPL Bruce fork — so this stays a clean-licensed personal project. AC OFF codes
+(`include/flipper_ac_off.h`) are the "Off" entries from the public
+[Flipper Zero universal `ac.ir`](https://github.com/flipperdevices/flipperzero-firmware/blob/dev/applications/main/infrared/resources/infrared/assets/ac.ir).
