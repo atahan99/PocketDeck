@@ -95,8 +95,8 @@ class BleCb : public NimBLECharacteristicCallbacks {
 
 void run_wifi() {
   g_n = 0;
-  WiFi.mode(WIFI_STA);
-  WiFi.begin();                       // saved creds from WiFiManager
+  bool owned = !ui::wifi_on();         // enable the radio only if the user hasn't
+  if (owned) ui::set_wifi_on(true);    // ...and turn it back off on exit
   WiFiUDP udp;
   bool up = false;
   char buf[512];
@@ -111,7 +111,7 @@ void run_wifi() {
     render("WiFi", conn);
     if (ui::frame(20).home) break;
   }
-  WiFi.mode(WIFI_OFF);
+  if (owned) ui::set_wifi_on(false);   // leave the global state as we found it
 }
 
 void run_ble() {

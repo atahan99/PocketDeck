@@ -16,6 +16,7 @@ static uint16_t rssi_color(int32_t r) {
 }
 
 void app_wifi_scan() {
+  bool was_on = ui::wifi_on();          // scanning needs the radio; restore state on exit
   WiFi.mode(WIFI_STA);
   WiFi.disconnect(false, true);
 
@@ -60,5 +61,5 @@ void app_wifi_scan() {
     if (ev.a) rescan();
     if (ev.b && n > rows) top = (top + rows) % n;   // page down, wraps
   }
-  WiFi.mode(WIFI_OFF);
+  ui::set_wifi_on(was_on);              // restore: reconnect if it was on, else radio off
 }

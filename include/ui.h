@@ -48,5 +48,7 @@ int last_card();                 // persisted launcher selection
 void set_last_card(int i);
 bool grove_5v();                 // Grove PORT.A 5V boost (off by default; whines unloaded)
 void set_grove_5v(bool on);      // apply + persist
+bool wifi_on();                  // global WiFi radio state (off by default)
+void set_wifi_on(bool on);       // connect saved network / radio off; persists
 
 }  // namespace ui

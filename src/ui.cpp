@@ -1,4 +1,5 @@
 #include <Preferences.h>
+#include <WiFi.h>
 #include <driver/gpio.h>
 #include <esp_sleep.h>
 
@@ -47,6 +48,13 @@ void set_last_card(int i) { prefs.putInt("card", i); }
 bool grove_5v() { return prefs.getBool("grove5v", false); }
 void set_grove_5v(bool on) { prefs.putBool("grove5v", on); M5.Power.setExtOutput(on); }
 
+bool wifi_on() { return prefs.getBool("wifi", false); }
+void set_wifi_on(bool on) {
+  prefs.putBool("wifi", on);
+  if (on) { WiFi.mode(WIFI_STA); WiFi.begin(); }           // reconnect saved network
+  else { WiFi.disconnect(true, true); WiFi.mode(WIFI_OFF); }  // radio fully off
+}
+
 // Only deep-sleep when actually running on the battery. On USB there's nothing
 // to save, and light sleep suspends the USB CDC link (and blocks re-flashing).
 static bool on_battery() {
@@ -75,6 +83,8 @@ void init() {
   user_brightness = prefs.getUChar("bri", 180);
   M5.Display.setBrightness(user_brightness);
   M5.Power.setExtOutput(prefs.getBool("grove5v", false));   // Grove 5V off by default (buzz)
+  if (prefs.getBool("wifi", false)) { WiFi.mode(WIFI_STA); WiFi.begin(); }
+  else { WiFi.mode(WIFI_OFF); }                             // radio off by default, not broadcasting
   idle_since = millis();
 }
 

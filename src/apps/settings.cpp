@@ -39,6 +39,33 @@ void wifi_setup() {
   delay(1200);
 }
 
+// WiFi hub: radio is off by default. A = toggle on/off, B = captive-portal setup.
+void wifi_page() {
+  while (true) {
+    ui::header("WiFi", TFT_CYAN);
+    bool on = ui::wifi_on();
+    wl_status_t st = WiFi.status();
+    fb.setTextSize(2);
+    fb.setTextColor(on ? TFT_GREEN : TFT_DARKGREY, TFT_BLACK);
+    fb.setCursor(6, 24);
+    fb.printf("Radio: %s", on ? "ON" : "OFF");
+    fb.setTextSize(1);
+    fb.setTextColor(TFT_WHITE, TFT_BLACK);
+    fb.setCursor(6, 52);
+    if (!on) fb.print("(not broadcasting)");
+    else if (st == WL_CONNECTED) { fb.printf("%s", WiFi.SSID().c_str()); fb.setCursor(6, 66); fb.printf("%s", WiFi.localIP().toString().c_str()); }
+    else fb.print("connecting...");
+    fb.setTextColor(TFT_DARKGREY, TFT_BLACK);
+    fb.setCursor(6, ui::H - 10);
+    fb.print("A=toggle  B=setup network");
+
+    ui::Ev ev = ui::frame(30);   // responsive long-press for back
+    if (ev.home) return;
+    if (ev.a) ui::set_wifi_on(!on);
+    if (ev.b) wifi_setup();
+  }
+}
+
 void brightness() {
   int b = ui::user_brightness;
   while (true) {
@@ -80,10 +107,10 @@ void app_settings() {
   while (true) {
     char grove[20];
     snprintf(grove, sizeof(grove), "Grove 5V: %s", ui::grove_5v() ? "ON" : "off");
-    const char *items[] = {"WiFi Setup", "Brightness", grove, "About"};
+    const char *items[] = {"WiFi", "Brightness", grove, "About"};
     int r = ui::menu("Settings", TFT_CYAN, items, 4, sel);
     if (r == ui::MENU_BACK) return;
-    if (r == 0) wifi_setup();
+    if (r == 0) wifi_page();
     else if (r == 1) brightness();
     else if (r == 2) ui::set_grove_5v(!ui::grove_5v());   // re-enable if you attach a 5V Grove unit
     else if (r == 3) about();
