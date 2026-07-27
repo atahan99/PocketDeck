@@ -210,6 +210,11 @@ void run_tvb(const struct IrCode **region, uint8_t total) {
 }  // namespace
 
 void app_ir_tools() {
+  // CRITICAL: on the StickS3 the IR TX/RX are powered from the EXT_5V rail, which
+  // is off by default (it's the idle-buzz source). Without this the emitter and
+  // receiver are dead -- nothing transmits. Power it for the whole IR session and
+  // restore the user's Grove-5V setting on exit. Buzz while in here is expected.
+  M5.Power.setExtOutput(true);
   irsend.begin();
 
   const char *items[] = {"TV-B-Gone NA", "TV-B-Gone EU", "AC-B-Gone", "Univ. Remote", "IR Emit Test"};
@@ -223,4 +228,5 @@ void app_ir_tools() {
     else if (r == 3) universal_remote();
     else if (r == 4) ir_selftest();
   }
+  M5.Power.setExtOutput(ui::grove_5v());   // restore (default off = no buzz)
 }

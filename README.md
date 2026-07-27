@@ -142,13 +142,17 @@ Sources: `~/.claude/projects/*/*.jsonl`, `~/.codex/sessions/**/*.jsonl`,
   GDMA rejects the DMA callback. Fixed in core 3.2.0; we pin 3.3.11.
 - **BLE needs NimBLE-Arduino ≥ 2.x.** 1.4.x predates ESP-IDF 5.5 and **hangs** the
   device at BLE host init (wedged, won't auto-reset — single-click power to recover).
-- **Idle buzz = the 5V Grove boost, not the amp.** Localized with a layer-by-layer
-  sweep (display off, panel sleep, CPU, battery). The amp is held off and the
-  display was only a minor contributor; the dominant hum is the **5V Grove boost
-  converter**, which M5PM1 leaves **on by default** and which whines while nothing
-  is plugged into PORT.A. `main.cpp` calls `M5.Power.setExtOutput(false)` at boot.
-  Re-enable it if you attach a 5V-powered Grove unit. Secondary: the backlight PWM
-  defaults to **256 Hz** (audible), re-init'd to **44.1 kHz** in the same spot.
+- **Idle buzz = the EXT_5V boost, not the amp.** Localized with a layer-by-layer
+  sweep (display off, panel sleep, CPU, battery). The dominant hum is the **EXT_5V
+  boost converter** (Grove/Hat 5V), which M5PM1 leaves **on by default** and which
+  whines unloaded. `ui::init()` turns it **off** by default (Settings has a toggle).
+  Secondary: backlight PWM defaults to **256 Hz** (audible), re-init'd to **44.1 kHz**.
+- **IR needs EXT_5V — the buzz fix disabled it.** Per the M5 docs, the IR TX **and**
+  RX are powered from the EXT_5V rail. With EXT_5V off (the buzz fix) the emitter is
+  **dead** — nothing transmits. `app_ir_tools()` calls `M5.Power.setExtOutput(true)`
+  for the whole IR session and restores the setting on exit (so the buzz only
+  returns while you're actually using IR). The amp must also stay off for the IR
+  receiver, which it already is.
 - **Tilt sign** in Tilt Maze depends on your grip — flip `TILT_SIGN` in `toys.cpp`
   if it feels mirrored.
 - **IR aim:** the G46 emitter is weak; point it at the target. TV-B-Gone timing is
