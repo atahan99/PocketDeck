@@ -71,12 +71,14 @@ logs and pushes status over WiFi (`wifi`) or BLE (`ble`, needs `pip install blea
 ## Inspiration & credits
 
 App ideas from the ESP32 hobbyist scene (from-scratch rebuild, not a port):
-[Bruce](https://github.com/pr3y/Bruce), [GhostBLE](https://github.com/SmonSE/GhostBLE),
+[Bruce](https://github.com/pr3y/Bruce) /
+[Bruce A-C Edition](https://github.com/tutyr2-jpg/Bruce-A-C-Edition),
+[GhostBLE](https://github.com/SmonSE/GhostBLE),
 [M5Stick-NEMO](https://github.com/n0xa/m5stick-nemo),
 [Open-Wifi-Scanner](https://github.com/geo-tp/Open-Wifi-Scanner),
 [CodeBuddy](https://github.com/CharlexH/CodeBuddy).
 
 TV-B-Gone codes: the Adafruit / Ken Shirriff / Mitch Altman port
-(`src/tvbgone_codes.cpp`). AC OFF codes: Flipper Zero's universal
-[`ac.ir`](https://github.com/flipperdevices/flipperzero-firmware/blob/dev/applications/main/infrared/resources/infrared/assets/ac.ir)
+(`src/tvbgone_codes.cpp`). AC OFF codes: the Flipper Zero universal `ac.ir` from
+[UberGuidoZ/Flipper Infrared](https://github.com/UberGuidoZ/Flipper/tree/main/Infrared)
 (`include/flipper_ac_off.h`).
