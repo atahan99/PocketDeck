@@ -1,178 +1,82 @@
 # StickS3 — merged launcher firmware
 
-One firmware, eleven apps, picked from a launcher on the
-[M5Stack StickS3](https://docs.m5stack.com/en/core/StickS3) (K150, ESP32-S3-PICO
-N8R8). There is no SD card, so everything is compiled in — a single `.bin` you
-flash once. Native [M5Unified](https://github.com/m5stack/M5Unified) + LVGL-free
-drawing; nothing is a port of the old StickC firmwares (they target the wrong
-display/pins and boot blank on this board).
+Eleven apps in one flashable firmware for the
+[M5Stack StickS3](https://docs.m5stack.com/en/core/StickS3) (ESP32-S3-PICO N8R8,
+8 MB PSRAM). No SD card — everything is compiled in and picked from a carousel
+launcher. Native M5Unified, from scratch (not a port of the StickC firmwares,
+which boot blank on this board).
 
-> Part of [m5stack-projects](../). Run all commands from this directory (`stick-s3/`).
+> Part of [m5stack-projects](../). Run commands from `stick-s3/`.
 
 ![Carousel launcher](docs/images/launcher.png)
-
-*Bruce-style horizontal card carousel — BtnB scrolls, BtnA launches. Screenshots below are captured straight off the device over USB with [`scripts/stick.py`](scripts/stick.py).*
 
 ## Apps
 
 | App | What it does |
 |-----|--------------|
-| **WiFi Scan** | 2.4 GHz APs: SSID, RSSI, channel, encryption. RSSI-colored. |
-| **Spectrum** | Promiscuous-mode channel monitor, ch 1–13 decaying bars + live packet HUD (RSSI/channel/ENC·OPEN). |
-| **Audio Viz** | Built-in ES8311 mic → FFT → reactive bars for ambient music. BtnA cycles gain. |
-| **IR Tools** | **TV-B-Gone** (Adafruit NA/EU power-code sweep), **AC-B-Gone** (blasts the 123 "Off" codes from Flipper Zero's universal `ac.ir`), a **Universal Remote** (learn on G42 → replay on G46, 3 slots in NVS), and an **IR Emit Test** (continuously fires the LED so a phone camera can confirm the emitter works). |
-| **AI Buddy** | Claude Code / Codex / Cursor session status, pushed from a host over **WiFi or BLE** (selectable). |
-| **BLE Scan** | Passive scan: nearby BLE devices, name/MAC, RSSI-colored. |
-| **BLE Spam** | Advertising-beacon spammer (Apple / Windows / Samsung / Android / All) — pairing-popup nuisance demo. **Warning-gated, authorized/own-device use only.** |
-| **Time** | Offline time tools: Stopwatch, Timer (BtnB +1 / double-click −1), Pomodoro, Interval (Tabata). No clock/WiFi. |
-| **Light** | Flashlight — full-white screen at max brightness. |
-| **Toys** | Tetris, Snake, Flappy, Dino (NVS high score), Breakout, Tilt Maze (BMI270). |
-| **Settings** | **WiFi** (radio off by default — toggle on/off, connection status, captive-portal setup), brightness, **Grove 5V toggle**, about. |
+| **WiFi Scan** | 2.4 GHz APs: SSID, RSSI, channel, encryption. |
+| **Spectrum** | Promiscuous channel monitor (1–13) + live packet HUD. |
+| **Audio Viz** | ES8311 mic → FFT bars. BtnA cycles gain. |
+| **IR Tools** | TV-B-Gone, AC-B-Gone (Flipper `ac.ir` codes), Universal Remote (learn on G42 → replay on G46, saved to NVS), Emit Test. |
+| **AI Buddy** | Claude Code / Codex / Cursor status, pushed from a host over WiFi or BLE. |
+| **BLE Scan** | Passive nearby-device scan. |
+| **BLE Spam** | Pairing-popup advertising spam (Apple/Windows/Samsung/Android). Warning-gated, authorized/own-device use only. |
+| **Time** | Stopwatch, Timer (BtnB +1 / double-click −1), Pomodoro, Interval. Offline. |
+| **Light** | Full-white flashlight. |
+| **Toys** | Tetris, Snake, Flappy, Dino, Breakout, Tilt Maze (IMU). |
+| **Settings** | WiFi (off by default; toggle + setup), brightness, Grove 5V, about. |
 
-**Power & persistence.** Battery % + charge state show in every header (glyph
-blinks red under 10%). The screen dims after 20 s idle and, **on battery only**,
-deep-sleeps after 2 min (wakes on a button) — it never *auto*-sleeps on USB so
-flashing/serial stay alive. **Hold the power button** to sleep on demand (works on
-USB too; a button press wakes it). Brightness and the last-opened launcher card
-persist in NVS.
-
-**Input model.** Two buttons everywhere (BtnA = KEY1/front, BtnB = KEY2/right side):
-**BtnA = select/action**, **BtnB = next**, **long-press = back/home**. Apps own
-their loop and return to the launcher on a long-press.
-
-**Game controls** (all games: long-press = quit, BtnA = retry after game-over):
-
-| Game | BtnA | BtnB |
-|------|------|------|
-| Tetris | rotate | move right (wraps to far left, so every column is reachable) |
-| Snake | turn left | turn right |
-| Flappy | flap | — |
-| Dino | jump | — |
-| Breakout | paddle left | paddle right |
-| Tilt Maze | — | — (tilt the device; flip `TILT_SIGN` in `toys.cpp` if mirrored) |
-
-Physics games run at a fixed ~30 fps — the loop is capped with `frame(33)` so
-speed doesn't scale with CPU (uncapped, they were unplayably fast).
+**Controls.** Two buttons: **BtnA** = select/action, **BtnB** = next, **long-press**
+= back. Battery % shows in every header; the screen dims then sleeps on idle (on
+battery only, to keep USB flashing alive), and holding power sleeps on demand.
 
 ## Screenshots
 
-Captured straight off the device over USB with [`scripts/stick.py`](scripts/stick.py):
-
 ![App gallery](docs/images/gallery.png)
-
-> **BLE Spam is a nuisance-class demo** of the unsolicited-advertising popup
-> vulnerability. It broadcasts to *every* BLE device in range, so it's gated
-> behind an on-screen warning and is for authorized testing or your own devices
-> only — check your local laws. HID injection ("Bad BLE") is intentionally left
-> out: no keyboard on this hardware, and it's a targeted-intrusion feature.
-
-## Hardware
-
-| Piece | Notes |
-|-------|-------|
-| StickS3 (K150) | ESP32-S3-PICO N8R8: **8 MB flash + 8 MB octal PSRAM**, 135×240 ST7789P3, BMI270 IMU, ES8311 mic, IR TX **G46** / RX G42, 250 mAh battery |
-| Power | USB-C, or the small internal battery |
-
-The 8 MB PSRAM is why this device gets a full framebuffer (and clean screenshots)
-where the [m5dial](../m5dial) — which has none — needed a tile bridge.
 
 ## Build & flash
 
-Needs [PlatformIO](https://platformio.org/). First build downloads the S3
-toolchain (~2 min).
+Needs [PlatformIO](https://platformio.org/); the first build pulls the S3 toolchain.
 
 ```bash
-./scripts/flash.sh                    # auto-detects the port
-./scripts/flash.sh /dev/cu.usbmodem2101
+./scripts/flash.sh            # auto-detects the port
 ```
 
-The platform is pinned to **pioarduino 55.03.311 (arduino-esp32 3.3.11)** on
-purpose — see [gotchas](#gotchas). The build ships **no secrets**: WiFi is entered
-on the device, so `firmware/stick-s3.bin` is a distributable factory image.
+Platform pinned to **pioarduino 55.03.311** (arduino-esp32 3.3.11) — see
+[gotchas](#gotchas). `firmware/stick-s3.bin` ships no secrets (WiFi is entered
+on-device).
 
-### Driving it from a host — screenshots, control, logs
+### Drive it from a host
 
-`scripts/stick.py` works the whole UI over USB serial and brings the screen back
-as a PNG. Unlike the Dial (no framebuffer, TCP tile bridge), the StickS3 has PSRAM
-for a full backbuffer, so a screenshot is just a buffer dump over the cable.
+`scripts/stick.py` works the UI over USB serial and returns the screen as a PNG:
 
 ```bash
-python scripts/stick.py shot                 # -> shot.png
-python scripts/stick.py key b b a            # BtnB, BtnB, BtnA
-python scripts/stick.py key home shot        # keys then a screenshot
-python scripts/stick.py logs -s 20           # stream the device log
+python scripts/stick.py shot            # -> shot.png
+python scripts/stick.py key b b a       # BtnB, BtnB, BtnA
+python scripts/stick.py logs -s 20      # stream the log
 ```
 
-Keys are `a` / `b` / `pwr` / `home` — the two buttons plus a synthetic long-press.
-Anything a finger can reach is reachable from here. **On the IR page, keys fire
-real IR.**
-
-## AI Buddy
-
-Shows Claude Code / Codex / Cursor status as three cards (green idle · yellow
-running · red attn). The host bridge tails each CLI's local session logs
-read-only and pushes a small JSON blob:
-
-```bash
-python scripts/buddy.py wifi           # UDP-broadcast to the device (port 5533)
-python scripts/buddy.py ble            # write over Bluetooth (needs: pip install bleak)
-python scripts/buddy.py selftest       # verify the state logic, no device
-```
-
-Pick the matching transport in the **AI Buddy** app. WiFi mode uses the network
-you provisioned in **Settings → WiFi Setup** (captive portal `StickS3-Setup`);
-BLE needs no network.
-
-Sources: `~/.claude/projects/*/*.jsonl`, `~/.codex/sessions/**/*.jsonl`,
-`~/.cursor/`. State is idle/running from log-file recency.
-
-> **ponytail:** "awaiting approval" isn't reliably detectable from logs across all
-> three CLIs, so it's only flagged if a log line literally mentions approval;
-> quota isn't in the logs and isn't shown. Cursor's log schema is unstable, so
-> its card reports presence/recency only.
+`scripts/buddy.py` feeds the AI Buddy app — it tails Claude/Codex/Cursor session
+logs and pushes status over WiFi (`wifi`) or BLE (`ble`, needs `pip install bleak`).
 
 ## Gotchas
 
-- **Prebuilt StickC firmwares boot blank here.** The StickS3 is a Jan-2026 board;
-  M5GFX only autodetects it from **v0.2.16+**. Old images use the wrong panel/pins.
-- **Octal PSRAM** needs `board_build.arduino.memory_type = qio_opi`. Wrong value →
-  PSRAM never inits and the framebuffer alloc fails (dark screen).
-- **Mic needs arduino-esp32 ≥ 3.2.0.** Older cores hit
-  `gdma: user context not in internal RAM` — the I2S handle lands in PSRAM and
-  GDMA rejects the DMA callback. Fixed in core 3.2.0; we pin 3.3.11.
-- **BLE needs NimBLE-Arduino ≥ 2.x.** 1.4.x predates ESP-IDF 5.5 and **hangs** the
-  device at BLE host init (wedged, won't auto-reset — single-click power to recover).
-- **Idle buzz = the EXT_5V boost, not the amp.** Localized with a layer-by-layer
-  sweep (display off, panel sleep, CPU, battery). The dominant hum is the **EXT_5V
-  boost converter** (Grove/Hat 5V), which M5PM1 leaves **on by default** and which
-  whines unloaded. `ui::init()` turns it **off** by default (Settings has a toggle).
-  Secondary: backlight PWM defaults to **256 Hz** (audible), re-init'd to **44.1 kHz**.
-- **IR needs EXT_5V — the buzz fix disabled it.** Per the M5 docs, the IR TX **and**
-  RX are powered from the EXT_5V rail. With EXT_5V off (the buzz fix) the emitter is
-  **dead** — nothing transmits. `app_ir_tools()` calls `M5.Power.setExtOutput(true)`
-  for the whole IR session and restores the setting on exit (so the buzz only
-  returns while you're actually using IR). The amp must also stay off for the IR
-  receiver, which it already is.
-- **Tilt sign** in Tilt Maze depends on your grip — flip `TILT_SIGN` in `toys.cpp`
-  if it feels mirrored.
-- **IR aim:** the G46 emitter is weak; point it at the target. TV-B-Gone timing is
-  verified against the code DB, but real-TV range depends on aim.
+- Prebuilt StickC firmwares boot blank — StickS3 is new; needs M5GFX ≥ 0.2.16.
+- Octal PSRAM needs `board_build.arduino.memory_type = qio_opi` or the framebuffer alloc fails.
+- Mic (ES8311) needs arduino-esp32 ≥ 3.2.0 (older → GDMA error); BLE needs NimBLE ≥ 2.x (1.4 hangs at init).
+- **IR is powered from the EXT_5V rail**, which also coil-whines at idle — so it's off by default and switched on only inside IR Tools. That's why IR is dead elsewhere and buzzes while in use.
+- Backlight PWM is moved 256 Hz → 44.1 kHz to stop an audible whine.
+- Tilt Maze mirrored? Flip `TILT_SIGN` in `toys.cpp`.
 
-## Inspiration
+## Inspiration & credits
 
-The app ideas come from the ESP32 hobbyist-firmware scene — this is a from-scratch
-native rebuild for the StickS3, not a port of any of them:
+App ideas from the ESP32 hobbyist scene (from-scratch rebuild, not a port):
+[Bruce](https://github.com/pr3y/Bruce), [GhostBLE](https://github.com/SmonSE/GhostBLE),
+[M5Stick-NEMO](https://github.com/n0xa/m5stick-nemo),
+[Open-Wifi-Scanner](https://github.com/geo-tp/Open-Wifi-Scanner),
+[CodeBuddy](https://github.com/CharlexH/CodeBuddy).
 
-- [Bruce](https://github.com/pr3y/Bruce) / [BruceDevices firmware](https://github.com/BruceDevices/firmware) / [Bruce A-C Edition](https://github.com/tutyr2-jpg/Bruce-A-C-Edition) — IR (TV/AC-B-Gone) and BLE-SPAM
-- [GhostBLE](https://github.com/SmonSE/GhostBLE) — BLE advertising spam
-- [M5Stick-NEMO](https://github.com/n0xa/m5stick-nemo) — the TV-B-Gone port and RF-tool feel
-- [Open-Wifi-Scanner](https://github.com/geo-tp/Open-Wifi-Scanner) — WiFi/spectrum tooling
-- [CodeBuddy](https://github.com/CharlexH/CodeBuddy) — the AI-agent status buddy
-
-## Credits & licensing
-
-TV-B-Gone power codes are the canonical **Adafruit / Ken Shirriff port of Mitch
-Altman + Limor Fried's** TV-B-Gone firmware (`src/tvbgone_codes.cpp`), *not* the
-AGPL Bruce fork — so this stays a clean-licensed personal project. AC OFF codes
-(`include/flipper_ac_off.h`) are the "Off" entries from the public
-[Flipper Zero universal `ac.ir`](https://github.com/flipperdevices/flipperzero-firmware/blob/dev/applications/main/infrared/resources/infrared/assets/ac.ir).
+TV-B-Gone codes: the Adafruit / Ken Shirriff / Mitch Altman port
+(`src/tvbgone_codes.cpp`). AC OFF codes: Flipper Zero's universal
+[`ac.ir`](https://github.com/flipperdevices/flipperzero-firmware/blob/dev/applications/main/infrared/resources/infrared/assets/ac.ir)
+(`include/flipper_ac_off.h`).
