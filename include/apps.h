@@ -14,12 +14,15 @@ struct App {
 
 // Defined per app file in src/apps/.
 void app_wifi_scan();
+void app_wifi_watch();
+void app_wifi_spam();
 void app_spectrum();
 void app_audio_viz();
 void app_ir_tools();
 void app_ai_buddy();
 void app_ble_scan();
 void app_ble_spam();
+void app_ble_hunter();
 void app_clock();
 void app_flashlight();
 void app_toys();

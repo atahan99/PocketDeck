@@ -1,6 +1,6 @@
 # StickS3 — merged launcher firmware
 
-Eleven apps in one flashable firmware for the
+Fourteen apps in one flashable firmware for the
 [M5Stack StickS3](https://docs.m5stack.com/en/core/StickS3) (ESP32-S3-PICO N8R8,
 8 MB PSRAM). No SD card — everything is compiled in and picked from a carousel
 launcher. Native M5Unified, from scratch (not a port of the StickC firmwares,
@@ -15,12 +15,15 @@ which boot blank on this board).
 | App | What it does |
 |-----|--------------|
 | **WiFi Scan** | 2.4 GHz APs: SSID, RSSI, channel, encryption. |
+| **WiFi Watch** | Receive-only attack detector: deauth/disassoc-flood counter + PineAP/Karma (one MAC beaconing many SSIDs). Channel-hops 1–13, transmits nothing. |
+| **WiFi Spam** | Raw 802.11 beacon flooder — funny/random fake APs. Warning-gated, authorized/own-device use only; beacons only, no deauth/association. |
 | **Spectrum** | Promiscuous channel monitor (1–13) + live packet HUD. |
 | **Audio Viz** | ES8311 mic → FFT bars. BtnA cycles gain. |
 | **IR Tools** | TV-B-Gone, AC-B-Gone (Flipper `ac.ir` codes), Universal Remote (learn on G42 → replay on G46, saved to NVS), Emit Test. |
 | **AI Buddy** | Claude Code / Codex / Cursor status, pushed from a host over WiFi or BLE. |
 | **BLE Scan** | Passive nearby-device scan. |
 | **BLE Spam** | Pairing-popup advertising spam (Apple/Windows/Samsung/Android). Warning-gated, authorized/own-device use only. |
+| **BLE Hunter** | Receive-only BLE spam detector: per-vendor advertising rates (Apple/Windows/Samsung/Google Fast Pair) + flood alarm. The counterpart to BLE Spam. |
 | **Time** | Stopwatch, Timer (BtnB +1 / double-click −1), Pomodoro, Interval. Offline. |
 | **Light** | Full-white flashlight. |
 | **Toys** | Tetris, Snake, Flappy, Dino, Breakout, Tilt Maze (IMU). |

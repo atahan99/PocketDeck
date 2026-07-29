@@ -7,12 +7,15 @@ using ui::fb;
 // draw_icon(). Order = carousel order.
 const App APPS[] = {
     {"WiFi Scan", app_wifi_scan, TFT_CYAN, 0},
+    {"WiFi Watch", app_wifi_watch, TFT_ORANGE, 11},
+    {"WiFi Spam", app_wifi_spam, TFT_RED, 12},
     {"Spectrum", app_spectrum, TFT_GREEN, 1},
     {"Audio Viz", app_audio_viz, TFT_MAGENTA, 2},
     {"IR Tools", app_ir_tools, TFT_ORANGE, 3},
     {"AI Buddy", app_ai_buddy, TFT_GREENYELLOW, 4},
     {"BLE Scan", app_ble_scan, TFT_BLUE, 7},
     {"BLE Spam", app_ble_spam, TFT_RED, 8},
+    {"BLE Hunter", app_ble_hunter, TFT_GREEN, 13},
     {"Time", app_clock, TFT_CYAN, 9},
     {"Light", app_flashlight, TFT_WHITE, 10},
     {"Toys", app_toys, TFT_YELLOW, 5},
@@ -87,6 +90,32 @@ static void draw_icon(uint8_t id, int cx, int cy, int s, uint16_t col) {
       fb.drawLine(cx, cy, cx, cy - s * 2 / 3, col);        // minute hand up
       fb.drawLine(cx, cy, cx + s / 2, cy + s / 4, col);    // hour hand
       break;
+    case 11:  // WiFi Watch: shield with alert bar
+      fb.drawLine(cx - s, cy - s, cx + s, cy - s, col);
+      fb.drawLine(cx - s, cy - s, cx - s, cy, col);
+      fb.drawLine(cx + s, cy - s, cx + s, cy, col);
+      fb.drawLine(cx - s, cy, cx, cy + s, col);
+      fb.drawLine(cx + s, cy, cx, cy + s, col);
+      fb.fillRect(cx - 1, cy - s / 2, 2, s - 2, col);   // exclamation
+      fb.fillCircle(cx, cy + s / 2, 1, col);
+      break;
+    case 12:  // WiFi Spam: wifi arcs + extra broadcast ring
+      for (int r = s; r > 0; r -= s / 3)
+        fb.fillArc(cx, cy + s / 2, r, r - 2, 200, 340, col);
+      fb.fillCircle(cx, cy + s / 2, 2, col);
+      fb.drawArc(cx, cy + s / 2, s + 6, s + 4, 200, 340, col);
+      break;
+    case 13: { // BLE Hunter: bluetooth rune + magnifier lens
+      int t = s, h = s / 2;
+      fb.drawLine(cx, cy - t, cx, cy + t, col);
+      fb.drawLine(cx, cy - t, cx + h, cy - h, col);
+      fb.drawLine(cx + h, cy - h, cx - h, cy + h, col);
+      fb.drawLine(cx, cy + t, cx + h, cy + h, col);
+      fb.drawLine(cx + h, cy + h, cx - h, cy - h, col);
+      fb.drawCircle(cx + s, cy + s, s / 2, col);
+      fb.drawLine(cx + s + s / 3, cy + s + s / 3, cx + s + s, cy + s + s, col);
+      break;
+    }
     case 10:  // Flashlight: sun
       fb.fillCircle(cx, cy, s / 2, col);
       for (int a = 0; a < 360; a += 45) {
