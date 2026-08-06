@@ -15,5 +15,5 @@ if [[ -z "${PORT}" ]]; then
 fi
 echo "flashing $PORT"
 pio run -t upload --upload-port "$PORT"
-cp .pio/build/sticks3/firmware.factory.bin firmware/stick-s3.bin
-echo "done. factory image copied to firmware/stick-s3.bin"
+cp .pio/build/sticks3/firmware.factory.bin firmware/pocketdeck.bin
+echo "done. factory image copied to firmware/pocketdeck.bin"

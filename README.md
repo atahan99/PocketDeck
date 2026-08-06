@@ -1,12 +1,10 @@
-# StickS3 — merged launcher firmware
+# PocketDeck
 
 Fourteen apps in one flashable firmware for the
 [M5Stack StickS3](https://docs.m5stack.com/en/core/StickS3) (ESP32-S3-PICO N8R8,
 8 MB PSRAM). No SD card — everything is compiled in and picked from a carousel
 launcher. Native M5Unified, from scratch (not a port of the StickC firmwares,
 which boot blank on this board).
-
-> Part of [m5stack-projects](../). Run commands from `stick-s3/`.
 
 ![Carousel launcher](docs/images/launcher.png)
 
@@ -46,7 +44,7 @@ Needs [PlatformIO](https://platformio.org/); the first build pulls the S3 toolch
 ```
 
 Platform pinned to **pioarduino 55.03.311** (arduino-esp32 3.3.11) — see
-[gotchas](#gotchas). `firmware/stick-s3.bin` ships no secrets (WiFi is entered
+[gotchas](#gotchas). `firmware/pocketdeck.bin` ships no secrets (WiFi is entered
 on-device).
 
 ### Drive it from a host
