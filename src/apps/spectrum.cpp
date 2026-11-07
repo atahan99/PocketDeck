@@ -35,7 +35,9 @@ void sniff(void *buf, wifi_promiscuous_pkt_type_t type) {
 }  // namespace
 
 void app_spectrum() {
+  bool was_on = ui::wifi_on();          // sniffing needs the radio; restore state on exit
   WiFi.mode(WIFI_STA);
+  WiFi.disconnect(false, true);
   esp_wifi_set_promiscuous(true);
   esp_wifi_set_promiscuous_rx_cb(&sniff);
   for (int i = 0; i <= CH; i++) g_count[i] = 0;
@@ -83,5 +85,5 @@ void app_spectrum() {
   }
 
   esp_wifi_set_promiscuous(false);
-  WiFi.mode(WIFI_OFF);
+  ui::set_wifi_on(was_on);              // restore: reconnect if it was on, else radio off
 }

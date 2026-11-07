@@ -8,6 +8,10 @@ matching the app's selector:
     python scripts/buddy.py wifi           # UDP-broadcast to port 5533
     python scripts/buddy.py ble            # write to the StickS3-Buddy GATT char
 
+Privacy: `wifi` mode UDP-broadcasts a truncated (<=60 char) copy of your latest
+prompt in cleartext to the whole LAN. On an untrusted network, prefer `ble`
+(point-to-point) or don't run it.
+
 State is idle/running/attn where:
     running = the session log changed within --active seconds
     idle    = older than that

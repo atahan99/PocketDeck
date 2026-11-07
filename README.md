@@ -1,12 +1,14 @@
 # PocketDeck
 
+[![build](https://github.com/atahan99/PocketDeck/actions/workflows/build.yml/badge.svg)](https://github.com/atahan99/PocketDeck/actions/workflows/build.yml)
+
 Fourteen apps in one flashable firmware for the
 [M5Stack StickS3](https://docs.m5stack.com/en/core/StickS3) (ESP32-S3-PICO N8R8,
 8 MB PSRAM). No SD card — everything is compiled in and picked from a carousel
 launcher. Native M5Unified, from scratch (not a port of the StickC firmwares,
 which boot blank on this board).
 
-![Carousel launcher](docs/images/launcher.png)
+![PocketDeck carousel](docs/images/carousel.gif)
 
 ## Apps
 
@@ -30,6 +32,22 @@ which boot blank on this board).
 **Controls.** Two buttons: **BtnA** = select/action, **BtnB** = next, **long-press**
 = back. Battery % shows in every header; the screen dims then sleeps on idle (on
 battery only, to keep USB flashing alive), and holding power sleeps on demand.
+
+## Legal & responsible use
+
+Some apps transmit: WiFi Spam floods beacon frames, BLE Spam broadcasts pairing
+adverts, and IR Tools blasts remote codes. Run these only against devices and
+networks you own or have written permission to test.
+
+Transmitting and spoofing on the 2.4 GHz band can be illegal where you live — in
+the US under FCC rules, and most countries have an equivalent. The spam tools are
+nuisance-class demos (beacons and adverts only; no deauth, no association, no
+client attacks), each gated behind an on-device warning, and every radio ships
+off by default. None of that is legal cover; where and how you use it is on you.
+
+PocketDeck is a learning and security-awareness project. The receive-only
+detectors (WiFi Watch, BLE Hunter) are the point: they let you see the same
+attacks from the defender's side.
 
 ## Screenshots
 
@@ -69,17 +87,9 @@ logs and pushes status over WiFi (`wifi`) or BLE (`ble`, needs `pip install blea
 - Backlight PWM is moved 256 Hz → 44.1 kHz to stop an audible whine.
 - Tilt Maze mirrored? Flip `TILT_SIGN` in `toys.cpp`.
 
-## Inspiration & credits
+## License & credits
 
-App ideas from the ESP32 hobbyist scene (from-scratch rebuild, not a port):
-[Bruce](https://github.com/pr3y/Bruce) /
-[Bruce A-C Edition](https://github.com/tutyr2-jpg/Bruce-A-C-Edition),
-[GhostBLE](https://github.com/SmonSE/GhostBLE),
-[M5Stick-NEMO](https://github.com/n0xa/m5stick-nemo),
-[Open-Wifi-Scanner](https://github.com/geo-tp/Open-Wifi-Scanner),
-[CodeBuddy](https://github.com/CharlexH/CodeBuddy).
-
-TV-B-Gone codes: the Adafruit / Ken Shirriff / Mitch Altman port
-(`src/tvbgone_codes.cpp`). AC OFF codes: the Flipper Zero universal `ac.ir` from
-[UberGuidoZ/Flipper Infrared](https://github.com/UberGuidoZ/Flipper/tree/main/Infrared)
-(`include/flipper_ac_off.h`).
+MIT — see [LICENSE](LICENSE). The bundled IR data (TV-B-Gone, Flipper AC codes)
+keeps its own terms, and the apps are a from-scratch rebuild inspired by the
+ESP32 hobbyist scene (Bruce, GhostBLE, M5Stick-NEMO, and others). Full
+attribution and upstream links are in [THIRD-PARTY.md](THIRD-PARTY.md).
